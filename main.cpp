@@ -1,10 +1,11 @@
 #include <iostream>
 #include <link.h>
-#include <fstream>
-#include <iostream>
-#include <fstream>
-#include <link.h>
-using namespace std;
+
+char *libmono = "YOUR_GAME/Mono/x86_64/libmono.so";
+char *dll = "PATH_TO_DLL";
+char *namespacee = "YOUR_DLL_NAMESPACE";
+char *klass = "YOUR_DLL_CLASS";
+char *method = "YOUR_DLL_METHOD";
 
 typedef long long __int64;
 
@@ -29,8 +30,8 @@ __int64 backup = 0;
 void disableAssemblyLoadCallback(void *library)
 {
     void *f = (dlsym(library, "mono_assembly_invoke_load_hook"));
-    int offset = *(int*)(f + 6 + 3);
-    __int64 *raxRef = (__int64*) (offset + f + 7 + 6);
+    int offset = *(int*)(((char*)f) + 6 + 3);
+    __int64 *raxRef = (__int64*) (offset + ((char*)f) + 7 + 6);
     __int64 *rax = *((__int64**) raxRef);
     backup = *rax;
     *rax = 0;
@@ -39,15 +40,15 @@ void disableAssemblyLoadCallback(void *library)
 void enableAssemblyLoadCallback(void *library)
 {
     void *f = (dlsym(library, "mono_assembly_invoke_load_hook"));
-    int offset = *(int*)(f + 6 + 3);
-    __int64 *raxRef = (__int64*) (offset + f + 7 + 6);
+    int offset = *(int*)(((char*)f) + 6 + 3);
+    __int64 *raxRef = (__int64*) (offset + ((char*)f) + 7 + 6);
     __int64 *rax = *((__int64**) raxRef);
     *rax = backup;
 }
 
 int __attribute__((constructor)) load()
 {
-    void *library = dlopen("YOUR_GAME/Mono/x86_64/libmono.so", RTLD_NOLOAD | RTLD_NOW);
+    void *library = dlopen(libmono, RTLD_NOLOAD | RTLD_NOW);
 
     mono_get_root_domain = (t_mono_get_root_domain) (dlsym(library, "mono_get_root_domain"));
     mono_thread_attach = (t_mono_thread_attach) (dlsym(library, "mono_thread_attach"));
@@ -60,13 +61,15 @@ int __attribute__((constructor)) load()
     disableAssemblyLoadCallback(library);
 
     mono_thread_attach(mono_get_root_domain());
-    void* assembly = mono_assembly_open((char*)"ASSEMBLY_LOCATION", NULL);
+    void* assembly = mono_assembly_open(dll, NULL);
     void* monoImage = mono_assembly_get_image(assembly);
-    void* monoClass = mono_class_from_name(monoImage, (char*)"YOUR_NAMESPACE", (char*)"YOUR_CLASS");
-    void* monoClassMethod = mono_class_get_method_from_name(monoClass, (char*)"YOUR_METHOD", 0);
+    void* monoClass = mono_class_from_name(monoImage, namespacee, klass);
+    void* monoClassMethod = mono_class_get_method_from_name(monoClass, method, 0);
     mono_runtime_invoke(monoClassMethod, NULL, NULL, NULL);
 
     enableAssemblyLoadCallback(library);
+
+    return 1;
 }
 
 void __attribute__((destructor)) unload()
