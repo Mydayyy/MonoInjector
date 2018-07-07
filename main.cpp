@@ -1,20 +1,20 @@
 #include <iostream>
 #include <link.h>
 
-char *libmono = "YOUR_GAME/Mono/x86_64/libmono.so";
-char *dll = "PATH_TO_DLL";
-char *namespacee = "YOUR_DLL_NAMESPACE";
-char *klass = "YOUR_DLL_CLASS";
-char *method = "YOUR_DLL_METHOD";
+const char *libmono = "/tmp/test/spaceship_Data/Mono/x86_64/libmono.so";
+const char *dll = "/mnt/Programming/OS/Programming/Projects/C#/AlbionOnline/InjectionTests/InjectionTests/Test/bin/Debug/Test.dll";
+const char *namespacee = "Test";
+const char *klass = "Class1";
+const char *method = "Load";
 
 typedef long long __int64;
 
 typedef void* (*t_mono_get_root_domain)();
 typedef void* (*t_mono_thread_attach)(void *monoDomain);
-typedef void* (*t_mono_assembly_open)(char *filename, void *status);
+typedef void* (*t_mono_assembly_open)(const char *filename, void *status);
 typedef void* (*t_mono_assembly_get_image)(void *assembly);
-typedef void* (*t_mono_class_from_name)(void *monoImage, char *namespacee, char *name);
-typedef void* (*t_mono_class_get_method_from_name)(void *klass, char *name, int paramCount);
+typedef void* (*t_mono_class_from_name)(void *monoImage, const char *namespacee, const char *name);
+typedef void* (*t_mono_class_get_method_from_name)(void *klass, const char *name, int paramCount);
 typedef void* (*t_mono_runtime_invoke)(void *monoMethod, void *obj, void **params, void **exc);
 
 t_mono_get_root_domain mono_get_root_domain;
