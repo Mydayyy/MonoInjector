@@ -1,11 +1,11 @@
 #include <iostream>
 #include <link.h>
 
-const char *libmono = "/tmp/test/spaceship_Data/Mono/x86_64/libmono.so";
-const char *dll = "/mnt/Programming/OS/Programming/Projects/C#/AlbionOnline/InjectionTests/InjectionTests/Test/bin/Debug/Test.dll";
-const char *namespacee = "Test";
-const char *klass = "Class1";
-const char *method = "Load";
+const char *libmono = "LIBMONO_SO_PATH";
+const char *dll = "MONO_DLL_PATH";
+const char *namespacee = "NAMESPACE";
+const char *klass = "CLASS";
+const char *method = "METHOD";
 
 typedef long long __int64;
 
@@ -58,7 +58,7 @@ int __attribute__((constructor)) load()
     mono_class_get_method_from_name = (t_mono_class_get_method_from_name) (dlsym(library, "mono_class_get_method_from_name"));
     mono_runtime_invoke = (t_mono_runtime_invoke) (dlsym(library, "mono_runtime_invoke"));
 
-    disableAssemblyLoadCallback(library);
+    // disableAssemblyLoadCallback(library);
 
     mono_thread_attach(mono_get_root_domain());
     void* assembly = mono_assembly_open(dll, NULL);
@@ -67,7 +67,7 @@ int __attribute__((constructor)) load()
     void* monoClassMethod = mono_class_get_method_from_name(monoClass, method, 0);
     mono_runtime_invoke(monoClassMethod, NULL, NULL, NULL);
 
-    enableAssemblyLoadCallback(library);
+    // enableAssemblyLoadCallback(library);
 
     return 1;
 }
